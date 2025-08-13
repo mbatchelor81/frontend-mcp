@@ -1,103 +1,238 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const router = useRouter();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    // Check authentication status
+    const authStatus = localStorage.getItem("isAuthenticated");
+    const email = localStorage.getItem("userEmail");
+    
+    if (authStatus === "true" && email) {
+      setIsAuthenticated(true);
+      setUserEmail(email);
+    } else {
+      // Redirect to login if not authenticated
+      router.push("/login");
+    }
+  }, [router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("userEmail");
+    router.push("/login");
+  };
+
+  // Show loading or redirect while checking auth
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-black text-white font-['Poppins'] flex">
+      {/* Left Sidebar */}
+      <div className="w-64 bg-black/50 backdrop-blur-lg border-r border-white/10 p-6 flex flex-col">
+        {/* Logo */}
+        <div className="mb-12">
+          <h1 className="text-2xl font-semibold">WATCH</h1>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+        
+        {/* Navigation Menu */}
+        <nav className="flex-1 space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3 text-white">
+              <Image src="/icons/home-icon.svg" alt="Home" width={20} height={20} />
+              <span className="font-medium">Home</span>
+            </div>
+            <div className="flex items-center space-x-3 text-white/80 hover:text-white cursor-pointer">
+              <Image src="/icons/favourites-icon.svg" alt="Favourites" width={20} height={20} />
+              <span>Favourites</span>
+            </div>
+            <div className="flex items-center space-x-3 text-white/80 hover:text-white cursor-pointer">
+              <Image src="/icons/trending-icon.svg" alt="Trending" width={20} height={20} />
+              <span>Trending</span>
+            </div>
+            <div className="flex items-center space-x-3 text-white/80 hover:text-white cursor-pointer">
+              <Image src="/icons/calendar-icon.svg" alt="Coming soon" width={20} height={20} />
+              <span>Coming soon</span>
+            </div>
+            <div className="flex items-center space-x-3 text-white/80 hover:text-white cursor-pointer">
+              <Image src="/icons/community-icon.svg" alt="Community" width={20} height={20} />
+              <span>Community</span>
+            </div>
+            <div className="flex items-center space-x-3 text-white/80 hover:text-white cursor-pointer">
+              <Image src="/icons/social-icon.svg" alt="Social" width={20} height={20} />
+              <span>Social</span>
+            </div>
+            <div className="flex items-center space-x-3 text-white/80 hover:text-white cursor-pointer">
+              <Image src="/icons/settings-icon.svg" alt="Settings" width={20} height={20} />
+              <span>Settings</span>
+            </div>
+          </div>
+          
+          {/* Bottom menu items */}
+          <div className="mt-auto pt-8">
+            <div 
+              className="flex items-center space-x-3 text-white/80 hover:text-white cursor-pointer"
+              onClick={handleLogout}
+            >
+              <Image src="/icons/logout-icon.svg" alt="Logout" width={20} height={20} />
+              <span>Logout</span>
+            </div>
+          </div>
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 relative">
+        {/* Header */}
+        <header className="flex items-center justify-between p-6 relative z-10">
+          <div className="flex items-center space-x-8">
+            <nav className="flex items-center space-x-6">
+              <span className="text-white font-medium">Movies</span>
+              <span className="text-white/80">Series</span>
+              <span className="text-white/80">Documentaries</span>
+            </nav>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <Image src="/icons/search-icon.svg" alt="Search" width={20} height={20} className="cursor-pointer" />
+            <Image src="/icons/alert-icon.svg" alt="Notifications" width={20} height={20} className="cursor-pointer" />
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-full overflow-hidden">
+                <Image src="/images/avatar.png" alt="User" width={32} height={32} className="object-cover" />
+              </div>
+              <span className="text-white font-medium">{userEmail.split('@')[0]}</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Hero Section */}
+        <div className="relative h-[500px] mx-6 mb-8 rounded-2xl overflow-hidden">
+          <Image 
+            src="/images/insider.png" 
+            alt="Insider" 
+            fill 
+            className="object-cover"
+            priority
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+          
+          {/* Hero Content */}
+          <div className="absolute bottom-8 left-8 space-y-4">
+            <h1 className="text-5xl font-semibold">Insider</h1>
+            <p className="text-white/80">2022 | Comedy horror | 1 Season</p>
+            <div className="flex items-center space-x-4">
+              <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-2xl font-medium transition-colors">
+                Watch now
+              </button>
+              <button className="bg-white/20 backdrop-blur-sm border border-white/20 p-3 rounded-2xl hover:bg-white/30 transition-colors">
+                <Image src="/icons/favourites-icon.svg" alt="Add to favorites" width={20} height={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Trending Section */}
+        <div className="px-6">
+          <h2 className="text-xl font-semibold mb-6">Trending</h2>
+          <div className="grid grid-cols-4 gap-6">
+            {/* Tokyo Train */}
+            <div className="relative group cursor-pointer">
+              <div className="relative h-[300px] rounded-2xl overflow-hidden">
+                <Image 
+                  src="/images/tokyo-train.png" 
+                  alt="Tokyo Train" 
+                  fill 
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute top-4 right-4">
+                  <button className="bg-white/20 backdrop-blur-sm border border-white/20 p-2 rounded-lg hover:bg-white/30 transition-colors">
+                    <Image src="/icons/favourites-icon.svg" alt="Add to favorites" width={16} height={16} />
+                  </button>
+                </div>
+                <div className="absolute inset-x-0 bottom-0 h-20 bg-white/90 backdrop-blur-sm p-4 rounded-b-2xl flex flex-col justify-center">
+                  <h3 className="text-lg font-semibold text-black">Tokyo Train</h3>
+                  <p className="text-sm text-black/70">2022 | Action, Thriller | 2h 15m</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Moonfall */}
+            <div className="relative group cursor-pointer">
+              <div className="relative h-[300px] rounded-2xl overflow-hidden">
+                <Image 
+                  src="/images/moonfall.png" 
+                  alt="Moonfall" 
+                  fill 
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute top-4 right-4">
+                  <button className="bg-white/20 backdrop-blur-sm border border-white/20 p-2 rounded-lg hover:bg-white/30 transition-colors">
+                    <Image src="/icons/favourites-icon.svg" alt="Add to favorites" width={16} height={16} />
+                  </button>
+                </div>
+                <div className="absolute inset-x-0 bottom-0 h-20 bg-white/90 backdrop-blur-sm p-4 rounded-b-2xl flex flex-col justify-center">
+                  <h3 className="text-lg font-semibold text-black">Moonfall</h3>
+                  <p className="text-sm text-black/70">2022 | Sci-Fi</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Life in Paris */}
+            <div className="relative group cursor-pointer">
+              <div className="relative h-[300px] rounded-2xl overflow-hidden">
+                <Image 
+                  src="/images/life-in-paris.png" 
+                  alt="Life in Paris" 
+                  fill 
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute top-4 right-4">
+                  <button className="bg-white/20 backdrop-blur-sm border border-white/20 p-2 rounded-lg hover:bg-white/30 transition-colors">
+                    <Image src="/icons/favourites-icon.svg" alt="Add to favorites" width={16} height={16} />
+                  </button>
+                </div>
+                <div className="absolute inset-x-0 bottom-0 h-20 bg-white/90 backdrop-blur-sm p-4 rounded-b-2xl flex flex-col justify-center">
+                  <h3 className="text-lg font-semibold text-black">Life in Paris</h3>
+                  <p className="text-sm text-black/70">2023 | Romance, Drama | 1h 45m</p>
+                </div>
+              </div>
+            </div>
+
+            {/* House of Gucci */}
+            <div className="relative group cursor-pointer">
+              <div className="relative h-[300px] rounded-2xl overflow-hidden">
+                <Image 
+                  src="/images/house-of-gucci.png" 
+                  alt="House of Gucci" 
+                  fill 
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute top-4 right-4">
+                  <button className="bg-white/20 backdrop-blur-sm border border-white/20 p-2 rounded-lg hover:bg-white/30 transition-colors">
+                    <Image src="/icons/favourites-icon.svg" alt="Add to favorites" width={16} height={16} />
+                  </button>
+                </div>
+                <div className="absolute inset-x-0 bottom-0 h-20 bg-white/90 backdrop-blur-sm p-4 rounded-b-2xl flex flex-col justify-center">
+                  <h3 className="text-lg font-semibold text-black">House of Gucci</h3>
+                  <p className="text-sm text-black/70">2021 | Drama, Crime</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

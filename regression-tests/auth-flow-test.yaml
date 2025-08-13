@@ -1,0 +1,244 @@
+name: "Movie Streaming App - Authentication Flow Test"
+description: "Comprehensive test suite for login, logout, and authentication state management"
+version: "1.0.0"
+created: "2025-08-13"
+
+test_environment:
+  base_url: "http://localhost:3000"
+  browser: "chromium"
+  viewport:
+    width: 1280
+    height: 720
+
+test_data:
+  valid_user:
+    email: "test@example.com"
+    password: "password123"
+    expected_username: "test"
+  
+  invalid_user:
+    email: "invalid@test.com"
+    password: "wrongpassword"
+
+test_scenarios:
+  - name: "Initial State - Unauthenticated Access"
+    description: "Verify that unauthenticated users are redirected to login"
+    steps:
+      - action: "navigate"
+        url: "/"
+        expected_redirect: "/login"
+      - action: "verify_page_elements"
+        elements:
+          - selector: "h1"
+            text: "WATCH"
+          - selector: "img[alt='Coffee']"
+            exists: true
+          - selector: "input[type='email']"
+            placeholder: "Email"
+          - selector: "input[type='password']"
+            placeholder: "Password"
+          - selector: "button"
+            text: "Log in"
+          - selector: "button"
+            text: "Sign up"
+      - action: "verify_background"
+        elements:
+          - selector: "p"
+            text: "Enjoy the newest movies"
+
+  - name: "Login Flow - Valid Credentials"
+    description: "Test successful login with valid credentials"
+    steps:
+      - action: "navigate"
+        url: "/login"
+      - action: "fill_form"
+        fields:
+          email: "{{ valid_user.email }}"
+          password: "{{ valid_user.password }}"
+      - action: "click"
+        selector: "button[type='submit']"
+        text: "Log in"
+      - action: "wait_for_navigation"
+        expected_url: "/"
+      - action: "verify_authenticated_state"
+        elements:
+          - selector: "h1"
+            text: "WATCH"
+          - selector: "span"
+            text: "{{ valid_user.expected_username }}"
+          - selector: "img[alt='User']"
+            exists: true
+          - selector: "span"
+            text: "Logout"
+
+  - name: "Home Page - Authenticated Content"
+    description: "Verify authenticated user can access home page content"
+    prerequisite: "Login Flow - Valid Credentials"
+    steps:
+      - action: "verify_page_elements"
+        elements:
+          - selector: "h1"
+            text: "Insider"
+          - selector: "button"
+            text: "Watch now"
+          - selector: "h2"
+            text: "Trending"
+          - selector: "h3"
+            text: "Tokyo Train"
+          - selector: "h3"
+            text: "Moonfall"
+          - selector: "h3"
+            text: "Life in Paris"
+          - selector: "h3"
+            text: "House of Gucci"
+      - action: "verify_navigation_menu"
+        elements:
+          - text: "Home"
+          - text: "Favourites"
+          - text: "Trending"
+          - text: "Coming soon"
+          - text: "Community"
+          - text: "Social"
+          - text: "Settings"
+          - text: "Logout"
+
+  - name: "Movie Cards - Interactive Elements"
+    description: "Test movie card interactions and overlays"
+    prerequisite: "Login Flow - Valid Credentials"
+    steps:
+      - action: "verify_movie_cards"
+        cards:
+          - title: "Tokyo Train"
+            subtitle: "2022 | Action, Thriller | 2h 15m"
+            has_favorite_button: true
+          - title: "Moonfall"
+            subtitle: "2022 | Sci-Fi"
+            has_favorite_button: true
+          - title: "Life in Paris"
+            subtitle: "2023 | Romance, Drama | 1h 45m"
+            has_favorite_button: true
+          - title: "House of Gucci"
+            subtitle: "2021 | Drama, Crime"
+            has_favorite_button: true
+      - action: "verify_overlay_styling"
+        expected:
+          background: "white/90"
+          text_color: "black"
+          uniform_height: true
+
+  - name: "Logout Flow"
+    description: "Test logout functionality and session cleanup"
+    prerequisite: "Login Flow - Valid Credentials"
+    steps:
+      - action: "click"
+        selector: "span"
+        text: "Logout"
+      - action: "wait_for_navigation"
+        expected_url: "/login"
+      - action: "verify_unauthenticated_state"
+        elements:
+          - selector: "input[type='email']"
+            value: ""
+          - selector: "input[type='password']"
+            value: ""
+          - selector: "button"
+            text: "Log in"
+      - action: "verify_session_cleanup"
+        local_storage:
+          isAuthenticated: null
+          userEmail: null
+
+  - name: "Protected Route Access After Logout"
+    description: "Verify that logged out users cannot access protected routes"
+    prerequisite: "Logout Flow"
+    steps:
+      - action: "navigate"
+        url: "/"
+        expected_redirect: "/login"
+      - action: "verify_page_elements"
+        elements:
+          - selector: "h1"
+            text: "WATCH"
+          - selector: "input[type='email']"
+            exists: true
+
+  - name: "Sign Up Navigation"
+    description: "Test navigation to signup page"
+    steps:
+      - action: "navigate"
+        url: "/login"
+      - action: "click"
+        selector: "button"
+        text: "Sign up"
+      - action: "wait_for_navigation"
+        expected_url: "/signup"
+      - action: "verify_page_elements"
+        elements:
+          - selector: "h1"
+            text: "WATCH"
+          - selector: "p"
+            text: "Join us to enjoy the newest movies"
+          - selector: "input[type='email']"
+            placeholder: "Email"
+          - selector: "input[type='password']"
+            placeholder: "Password"
+          - selector: "input[type='password']"
+            placeholder: "Confirm Password"
+          - selector: "button"
+            text: "Sign up"
+
+  - name: "Form Validation"
+    description: "Test form validation and error handling"
+    steps:
+      - action: "navigate"
+        url: "/login"
+      - action: "click"
+        selector: "button[type='submit']"
+        text: "Log in"
+      - action: "verify_validation"
+        expected: "form_not_submitted"
+      - action: "fill_form"
+        fields:
+          email: "invalid-email"
+          password: "123"
+      - action: "verify_html5_validation"
+        field: "email"
+        expected: "invalid_format"
+
+expected_results:
+  authentication_flow:
+    - "Unauthenticated users redirected to login"
+    - "Valid credentials allow access to home page"
+    - "User information displayed correctly in header"
+    - "Logout clears session and redirects to login"
+    - "Protected routes inaccessible after logout"
+  
+  ui_elements:
+    - "Login form renders with proper styling"
+    - "Movie cards display with uniform overlays"
+    - "Navigation menu functional"
+    - "Background gradients and images load correctly"
+  
+  data_persistence:
+    - "Authentication state stored in localStorage"
+    - "Session cleanup on logout"
+    - "User email preserved and displayed"
+
+regression_criteria:
+  critical_failures:
+    - "Cannot access login page"
+    - "Valid credentials rejected"
+    - "Logout functionality broken"
+    - "Protected routes accessible without auth"
+  
+  ui_regressions:
+    - "Login form styling broken"
+    - "Movie card overlays inconsistent"
+    - "Background images not loading"
+    - "Navigation menu not functional"
+
+notes:
+  - "This test suite covers the complete authentication flow"
+  - "Tests should be run against a clean browser state"
+  - "LocalStorage is used for demo authentication"
+  - "All visual elements should match Figma designs"
